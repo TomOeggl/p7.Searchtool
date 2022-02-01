@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bootstrap Site</title>
+    
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/css/bootstrap.min.css"
+      integrity="sha384-r4NyP46KrjDleawBgD5tp8Y7UzmLA05oM1iAEQ17CSuDqnUK2+k9luXQOfXJCJ4I"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
+      integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/5.0.0-alpha1/js/bootstrap.min.js"
+      integrity="sha384-oesi62hOLfzrys4LxRF63OJCXdXDipiYWBnvTl9Y9/TRlw5xlKIEHpNyvvDShgf/"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://kit.fontawesome.com/f245a83461.js"
+      crossorigin="anonymous"
+    ></script>
+    <link rel="stylesheet" href="custom.css" />
+  </head>
+  <body>
+    <div class="container-fluid mx-auto">
+      <div class="row">
+        <nav class="navbar mx-auto">
+          <a class="navbar-brand mx-auto" href="index.html">
+            <img src="/files/p7logo.png" alt="" width="268" height="93">
+          </a>
+        </nav>
+      </div>
+      <div class="row">
+        <form class="form-inline" id = "searchbar" >
+          <div class=" ">
+          <div class="input-group ">
+          <input
+            class="form-control border-right-0 border search-main"
+            type="search"
+            placeholder="Search an ingredient, device, ustensil or a recipe"
+            id="search-input"
+            
+          />
+          <div class="input-group-append">
+          <button class="btn search-button py-3" type="submit"> <i class="fa fa-search fa-lg"></i></button> 
+          </div>
+          </div>
+          </div>
+        </form>
+      </div>
+      <div id="tag-container" class="row"></div>
+      <div class="input-group ingredient-input my-3" id="ingredient-input-group">
+        <input type="text" id="ingredient-input-textfield" class="form-control ingredient-text-input" aria-label="Text input with segmented dropdown button" placeholder="Ingredient">
+        
+        <button class="btn btn-secondary dropdown-toggle ingredient-dropdown-button" type="button" onchange="ingredientChange()"  id="ingredient-dropdown-button" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">
+              
+            </button>
+        <div class="dropdown-menu ingredient-dropdown-menu multi-column columns-3" aria-labelledby="ingredient-dropdown-button" id="ingredient-dropdown-menu">
+          <!--
+          <button class="dropdown-item ingredient-dropdown-item">Coconut</button>
+          <a class="dropdown-item ingredient-dropdown-item" href="#">Action</a>
+          <a class="dropdown-item ingredient-dropdown-item" href="#">Disabled action</a>
+          <a class="dropdown-item ingredient-dropdown-item" href="#">Action</a>
+          -->
+          
+        </div>
+      </div>
+      <div class="dropdown">
+        
+      </div>
+      <div class="container-fluid">
+        <div class="row  gx-5 mt-3" id="recipe-container">
+          <div class="col-4">
+            <div class="card recipe-card" >
+              <img
+                src="https://source.unsplash.com/-YHSwy6uqvk"
+                
+                class="card-img-top img-fluid"
+                alt=""
+              />
+              <div class="card-body ">
+                <div class="row">
+                    <div class="col w-75"> 
+                        <h3 class="card-title mt-3 ml-3">Coco Lemonade</h3>
+                    </div>
+                    <div class="col w-25 mt-4 text-right">
+                        <h5 class="text-end"><b><i class="far fa-clock mr-2 fa-lg "></i>10 min</b></h5>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col w-50 mt-4 ">  
+                        
+                        <ul class="list-group ingredient-list">
+                            <li class="list-group-item ingredient lh-1 "><b>Coconut milk:</b> 400 ml</li>
+                            <li class="list-group-item ingredient lh-1 "><b>Lemon juice:</b> 2</li>
+                            <li class="list-group-item ingredient lh-1"><b>Coconut cream:</b> 4 tablespoons</li>
+                            <li class="list-group-item ingredient lh-1"><b>Sugar:</b> 20g</li>
+                            <li class="list-group-item ingredient lh-1"><b>Ice cubes:</b> 2</li>
+                        </ul>
+
+                    </div>
+                    <div class="col w-50 mt-4">
+                        <p class="card-text recipe-text">  Place the ice cubes to your taste in the blender, add the milk, the coconut cream, the juice from 2 lemons and the sugar. Blend to the desired consistency</p>
+                    </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,182 @@
+.input-group {
+  background-color: #e5e5e5;
+  border-radius: 0.3rem;
+  height: 4rem;
+}
+
+.search-main {
+  background-color: #e5e5e5;
+  color: black;
+  font-weight: 400;
+  font-size: large;
+}
+.input-group > .form-control:focus {
+  box-shadow: none;
+  background-color: #e5e5e5;
+  color: black;
+}
+.search-button:focus {
+  box-shadow: none;
+  background-color: #e5e5e5;
+}
+
+.recipe-card {
+  background-color: #e5e5e5;
+  height: 37rem;
+  margin-bottom: 3rem;
+}
+
+.card-img-top {
+  max-height: 18rem;
+  -o-object-fit: cover;
+  object-fit: cover;
+}
+
+.ingredient {
+  border: none;
+  background-color:#e5e5e5;
+  // line-height: 50%;
+  margin-top: 0px;
+  padding-top: 0px;
+  padding-bottom: 0.2rem;
+  font-size: large;
+}
+
+.ingredient-list {
+  //border: 2px solid black;
+  overflow: hidden;
+  //text-overflow: ellipsis;
+  -webkit-line-clamp: 8;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.recipe-text {
+  //height: 6rem;
+  font-weight: 420;
+  font-size: 1.05rem;
+  margin-top: -0.3rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 6;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.card-title{
+    min-height: 4rem;
+    max-height: 4rem;
+    overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.ingredient-input{
+  
+  width: 12rem;
+  
+}
+
+.ingredient-text-input{
+  background-color: rgb(50, 96, 213);
+  width: 12rem;
+  color: white;
+  border: none;  
+}
+
+.ingredient-text-input:focus, .ingredient-text-input:active, .ingredient-input:focus{
+  background-color: rgb(50, 96, 213);
+}
+
+.ingredient-input > .ingredient-text-input:focus{
+  background-color: rgb(50, 96, 213);
+  color: white;
+}
+.ingredient-text-input::placeholder{
+  
+    color: white;
+    opacity: 1; 
+}
+
+.ingredient-dropdown-button{
+  background-color: rgb(50, 96, 213);
+  border: none;
+  color: white;
+}
+
+.ingredient-dropdown-button:focus, .ingredient-dropdown-button:hover {
+  background-color: rgb(50, 96, 213);
+  box-shadow: none;
+  border: none;
+  color: white;
+  rotate: 180deg;
+  
+}
+
+.ingredient-dropdown-menu, .ingredient-dropdown-menu:focus{
+  background-color: rgb(50, 96, 213);
+  box-shadow: none;
+  border: none;
+  
+  margin-top: -4px;
+  margin-left: -37.6rem;
+  width: 40rem;
+
+}
+
+.ingredient-dropdown-item{
+  color: white;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0px;
+  margin-left: -2rem;
+}
+.ingredient-dropdown-item:hover{
+  background-color: rgb(50, 96, 213);
+  color: rgb(200, 235, 252);
+  border: none;
+  
+}
+.ingredient-dropdown-item:active{
+  background-color: rgb(50, 96, 213);
+  border: none;
+}
+
+  
+#ingredient-input-group{
+  width: 20rem;
+}
+
+.search-tag{
+  
+  width: max-content;
+  padding: .5rem 1.5rem .5rem 1rem;
+  margin-top: 1rem;
+  border-radius: .3rem;
+  color: white;
+  &__button{
+    position:relative;
+    margin-left: .5rem;
+    background-color: inherit;
+    border: none;
+    color: white;
+    size: 3rem;
+    margin-right: -1rem;
+    bottom: -.05rem;
+    
+  }
+  &__button:focus{
+    border: none;
+    outline: none;
+  }
+}
+
+.bg-ingredient{
+  background-color: rgb(50, 96, 213);
+}
+
+
+
