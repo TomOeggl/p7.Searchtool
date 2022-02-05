@@ -3,12 +3,20 @@ const recipes = [];
 const renderQueue = [];
 const searchBar = document.getElementById("searchbar");
 const inputByIngredient = document.getElementById("ingredient-input-textfield");
+const inputByAppliance = document.getElementById("appliance-input-textfield");
+const inputByUtensil = document.getElementById("utensil-input-textfield");
 const dropdownButtonIngredient = document.getElementById(
   "ingredient-dropdown-button"
 );
-const recipeContainer = document.getElementById("recipe-container");
+const dropdownButtonAppliance = document.getElementById(
+  "appliance-dropdown-button"
+);
 
-console.log("JS is running.");
+const dropdownButtonUtensil = document.getElementById(
+  "utensil-dropdown-button"
+);
+const recipeContainer = document.getElementById("recipe-container");
+//const filteredArray = array1.filter(value => array2.includes(value));
 
 const searchtree = {
   ingredients: [], // ingredientName: Appearances(Recipe Indezes)
@@ -28,13 +36,170 @@ function reference() {
   word = ""; // = longKey
   type = "";
   recipeReferences = [];
+  originalString = "";
+}
+
+function targetInformation() {
+  this.indezes = [];
+  this.originalName = "";
+}
+
+function dropdownItem(name, type, originalName) {
+  this.domElement = document.createElement("button");
+  this.domElement.className = "dropdown-item custom-dropdown-item";
+  switch (type) {
+    case "ingredients": {
+      this.domElement.classList.add("bg-ingredients");
+      break;
+    }
+    case "appliances": {
+      this.domElement.classList.add("bg-appliance");
+      break;
+    }
+    case "utensils": {
+      this.domElement.classList.add("bg-utensil");
+      break;
+    }
+  }
+  this.domElement.textContent = originalName;
+  this.domElement.addEventListener("click", (event) => {
+    event.preventDefault();
+    console.log("Creating searchvector from dropdownItem");
+    searchAndRender(name, type, true);
+  });
+}
+
+function searchTag(name, type) {
+  this.domElement = document.createElement("p");
+  this.domElement.className = "search-tag mx-3";
+  this.domButton = document.createElement("button");
+  this.domButton.className = "search-tag__button";
+  let reader;
+  switch (type) {
+    case undefined: {
+      this.domElement.classList.add("tag-neutral");
+      this.domButton.classList.add("search-tag__button--inverted");
+      console.log("inverted");
+    }
+    case "ingredients": {
+      this.domElement.classList.add("bg-ingredient");
+      break;
+    }
+    case "appliances": {
+      this.domElement.classList.add("bg-appliance");
+      break;
+    }
+    case "utensils": {
+      this.domElement.classList.add("bg-utensil");
+      break;
+    }
+  }
+  if (type !== undefined) {
+    reader = searchtree[type][name];
+  }
+  //console.log(reader.originalName);
+  if (reader !== undefined) {
+    this.domElement.textContent = reader.originalName;
+  } else {
+    this.domElement.textContent = name;
+  }
+  let hostNode = document.getElementById("tag-container");
+
+  this.domElement.appendChild(this.domButton);
+
+  this.domButton.innerHTML = "<i class='far fa-lg fa-times-circle'></i>";
+  this.domButton.type = "button";
+  this.domButton.addEventListener("click", (event) => {
+    hostNode.removeChild(this.domElement);
+    renderQueue.splice(renderQueue.indexOf(this),1);
+    renderArray(intersectResults());
+    //console.log(renderQueue);
+    delete this;
+  });
+  this.appendToDom = function () {
+    //console.log(hostNode);
+    //console.log(this.domElement);
+    hostNode.append(this.domElement);
+    renderQueue.push(this);
+    //console.log(renderQueue);
+    //renderArray(intersectResults());
+  };
+  this.parentVector;
+  this.log = function () {
+    console.log("Searchtag created:");
+    console.log(this);
+  };
+}
+
+function searchVector(string, type, publishTag) {
+  this.fullString = filterToLowerCase(string);
+  if (type !== undefined) {
+    this.typeReq = filterToLowerCase(type);
+  }
+  this.searchKeys = extractSearchKeys(this.fullString);
+  this.searchKeys.shift();
+  console.log("SearchVector created: ");
+  console.log(this);
+  if (publishTag) {
+    this.tag = new searchTag(string, type);
+    this.tag.appendToDom();
+    this.tag.parentVector = this;
+    //this.tag.log();
+    renderArray(intersectResults());
+  }
+}
+
+function intersectResults() {
+  if (renderQueue.length > 1) {
+    console.log("Intersecting results: ");
+    console.log(renderQueue);
+    let intersectedArray = [];
+    let array0 = lookUp(renderQueue[0].parentVector);
+    console.log(array0);
+    for(var i = 1, len = renderQueue.length; i < len; i++){
+      let arrayLooped = lookUp(renderQueue[i].parentVector);
+      intersectedArray = array0.filter(value => arrayLooped.includes(value));
+      console.log(intersectedArray);
+      array0 = intersectedArray;
+    }
+    console.log(intersectedArray);
+    return intersectedArray;
+  }
+  else if (renderQueue.length === 1){
+    return lookUp(renderQueue[0].parentVector);
+  }
+  else{
+    return "nothing to intersect";
+  }
+}
+
+const results = {
+  toCompare: [],
+  toRender: [],
+};
+
+function searchAndRender(name, type, publishTag) {
+  if (publishTag === undefined) {
+    publishTag = false;
+  }
+  let searchVectorFromIngredientItem = new searchVector(name, type, publishTag);
+  console.log("Search Results are: ");
+  console.log(intersectResults(searchVectorFromIngredientItem));
+  createRenderQueue(intersectResults(searchVectorFromIngredientItem));
+  console.log("Rendering to DOM");
+
+  renderArray(results.toRender);
 }
 
 searchBar.addEventListener("submit", function (event) {
   event.preventDefault();
   var searchInput = document.getElementById("search-input");
   console.log(searchInput.value);
-  let searchVectorFromInput = new searchVector(searchInput.value);
+  let searchVectorFromInput = new searchVector(
+    searchInput.value,
+    undefined,
+    true
+  );
   console.log("Search Results are: ");
   console.log(lookUp(searchVectorFromInput));
   createRenderQueue(lookUp(searchVectorFromInput));
@@ -56,11 +221,10 @@ inputByIngredient.addEventListener("keydown", function (event) {
       populateDropdownMenu(
         "ingredient-dropdown-menu",
         "ingredients",
-        lookUp(searchVectorFromKeydown)
+        lookUpTargets(searchVectorFromKeydown)
       );
 
       if (dropdownMenuIngredient.classList.contains("show") === false) {
-        console.log("added show");
         document
           .getElementById("ingredient-dropdown-menu")
           .classList.add("show");
@@ -88,6 +252,93 @@ inputByIngredient.addEventListener("keydown", function (event) {
   }
 });
 
+inputByAppliance.addEventListener("keydown", function (event) {
+  if (event.code !== "Enter") {
+    let dropdownMenuAppliance = document.getElementById(
+      "appliance-dropdown-menu"
+    );
+    if (inputByAppliance.value.length > 2) {
+      let searchVectorFromKeydown = new searchVector(
+        inputByAppliance.value,
+        "appliances"
+      );
+      populateDropdownMenu(
+        "appliance-dropdown-menu",
+        "appliances",
+        lookUpTargets(searchVectorFromKeydown)
+      );
+      console.log("input by appliance lookup results");
+      console.log(lookUp(searchVectorFromKeydown));
+      if (dropdownMenuAppliance.classList.contains("show") === false) {
+        document
+          .getElementById("appliance-dropdown-menu")
+          .classList.add("show");
+        document.getElementById("appliance-dropdown-menu").style.marginLeft =
+          "0rem";
+        document.getElementById("appliance-dropdown-menu").style.width =
+          "20rem";
+      }
+    }
+  }
+  if (event.code == "Enter") {
+    //event.preventDefault();
+    //var searchInput = document.getElementById("search-input");
+    console.log(inputByAppliance.value);
+    let searchVectorFromInput = new searchVector(
+      inputByAppliance.value,
+      "appliances",
+      true
+    );
+    console.log("Search Results are: ");
+    console.log(searchVectorFromInput);
+    createRenderQueue(lookUp(searchVectorFromInput));
+    console.log("Rendering to DOM");
+    //console.log(recipes[1]);
+    renderArray(results.toRender);
+  }
+});
+
+inputByUtensil.addEventListener("keydown", function (event) {
+  if (event.code !== "Enter") {
+    let dropdownMenuUtensil = document.getElementById("utensil-dropdown-menu");
+    if (inputByUtensil.value.length > 2) {
+      let searchVectorFromKeydown = new searchVector(
+        inputByUtensil.value,
+        "utensils"
+      );
+      populateDropdownMenu(
+        "utensil-dropdown-menu",
+        "utensils",
+        lookUpTargets(searchVectorFromKeydown)
+      );
+      console.log("input by Utensil lookup results");
+      console.log(lookUp(searchVectorFromKeydown));
+      if (dropdownMenuUtensil.classList.contains("show") === false) {
+        document.getElementById("utensil-dropdown-menu").classList.add("show");
+        document.getElementById("utensil-dropdown-menu").style.marginLeft =
+          "0rem";
+        document.getElementById("utensil-dropdown-menu").style.width = "20rem";
+      }
+    }
+  }
+  if (event.code == "Enter") {
+    //event.preventDefault();
+    //var searchInput = document.getElementById("search-input");
+    console.log(inputByUtensil.value);
+    let searchVectorFromInput = new searchVector(
+      inputByUtensil.value,
+      "utensils",
+      true
+    );
+    console.log("Search Results are: ");
+    console.log(searchVectorFromInput);
+    createRenderQueue(lookUp(searchVectorFromInput));
+    console.log("Rendering to DOM");
+    //console.log(recipes[1]);
+    renderArray(results.toRender);
+  }
+});
+
 document.querySelector("body").addEventListener("click", (event) => {
   if (
     event.target.id === "ingredient-input-textfield" ||
@@ -96,18 +347,66 @@ document.querySelector("body").addEventListener("click", (event) => {
   } else {
     document.getElementById("ingredient-dropdown-menu").style.width = "40rem";
     document.getElementById("ingredient-dropdown-menu").style.marginLeft =
-      "-37.6rem";
+      "-37.1rem";
     document
       .getElementById("ingredient-dropdown-menu")
       .classList.remove("show");
+    while (
+      document.getElementById("ingredient-dropdown-menu").lastElementChild
+    ) {
+      document
+        .getElementById("ingredient-dropdown-menu")
+        .removeChild(
+          document.getElementById("ingredient-dropdown-menu").lastElementChild
+        );
+    }
+    populateDropdownMenu("ingredient-dropdown-menu", "ingredients");
+  }
+  if (
+    event.target.id === "appliance-input-textfield" ||
+    event.target.classList.contains("appliance-dropdown-item") !== false
+  ) {
+  } else {
+    document.getElementById("appliance-dropdown-menu").style.width = "40rem";
+    document.getElementById("appliance-dropdown-menu").style.marginLeft =
+      "-37.1rem";
+    document.getElementById("appliance-dropdown-menu").classList.remove("show");
+    while (
+      document.getElementById("appliance-dropdown-menu").lastElementChild
+    ) {
+      document
+        .getElementById("appliance-dropdown-menu")
+        .removeChild(
+          document.getElementById("appliance-dropdown-menu").lastElementChild
+        );
+    }
+    populateDropdownMenu("appliance-dropdown-menu", "appliances");
+  }
+  if (
+    event.target.id === "utensil-input-textfield" ||
+    event.target.classList.contains("utensil-dropdown-item") !== false
+  ) {
+  } else {
+    document.getElementById("utensil-dropdown-menu").style.width = "40rem";
+    document.getElementById("utensil-dropdown-menu").style.marginLeft =
+      "-37.1rem";
+    document.getElementById("utensil-dropdown-menu").classList.remove("show");
+    while (document.getElementById("utensil-dropdown-menu").lastElementChild) {
+      document
+        .getElementById("utensil-dropdown-menu")
+        .removeChild(
+          document.getElementById("utensil-dropdown-menu").lastElementChild
+        );
+    }
+    populateDropdownMenu("utensil-dropdown-menu", "utensils");
   }
 });
 
 dropdownButtonIngredient.addEventListener("show.bs.dropdown", (event) => {
-  console.log(event);
   let ingredientInputGroup = document.getElementById("ingredient-input-group");
   ingredientInputGroup.style.width = "40rem";
 });
+
 document
   .getElementById("ingredient-input-group")
   .addEventListener("hide.bs.dropdown", (event) => {
@@ -115,6 +414,30 @@ document
       "ingredient-input-group"
     );
     ingredientInputGroup.style.width = "20rem";
+  });
+
+dropdownButtonAppliance.addEventListener("show.bs.dropdown", (event) => {
+  let ingredientInputGroup = document.getElementById("appliance-input-group");
+  ingredientInputGroup.style.width = "40rem";
+});
+document
+  .getElementById("appliance-input-group")
+  .addEventListener("hide.bs.dropdown", (event) => {
+    let ingredientInputGroup = document.getElementById("appliance-input-group");
+    ingredientInputGroup.style.width = "20rem";
+    ingredientInputGroup.classList.remove("show");
+  });
+
+dropdownButtonUtensil.addEventListener("show.bs.dropdown", (event) => {
+  let utensilInputGroup = document.getElementById("utensil-input-group");
+  utensilInputGroup.style.width = "40rem";
+});
+document
+  .getElementById("utensil-input-group")
+  .addEventListener("hide.bs.dropdown", (event) => {
+    let utensilInputGroup = document.getElementById("utensil-input-group");
+    utensilInputGroup.style.width = "20rem";
+    utensilInputGroup.classList.remove("show");
   });
 
 function populateDropdownMenu(targetMenu, type, results) {
@@ -139,9 +462,15 @@ function populateDropdownMenu(targetMenu, type, results) {
           createDropdownMultiRow();
           break;
       }
-      let dropItem = new dropdownItem(subReader[e][0], type);
+      if (subReader[e] !== undefined) {
+        let dropItem = new dropdownItem(
+          subReader[e][0],
+          type,
+          subReader[e][1].originalName
+        );
 
-      targetNode.append(dropItem.domElement);
+        targetNode.append(dropItem.domElement);
+      }
     }
   } else {
     while (dropdownMenu.lastElementChild) {
@@ -156,7 +485,12 @@ function populateDropdownMenu(targetMenu, type, results) {
     targetNode = dropdownMenu;
     for (var e = 0, len = results.length; e < len; e++) {
       if (results[e].type == type) {
-        let dropItem = new dropdownItem(results[e].searchTarget, type);
+        console.log(results);
+        let dropItem = new dropdownItem(
+          results[e].searchTarget,
+          type,
+          results[e].originalString
+        );
         console.log(dropItem);
         targetNode.append(dropItem.domElement);
         dropItem.domElement.style.marginLeft = "1rem";
@@ -173,79 +507,6 @@ function populateDropdownMenu(targetMenu, type, results) {
     targetNode = newUL;
   }
 }
-
-function dropdownItem(name, type) {
-  this.domElement = document.createElement("button");
-  this.domElement.className = "dropdown-item ingredient-dropdown-item";
-  this.domElement.textContent = name;
-  this.domElement.addEventListener("click", (event) => {
-    event.preventDefault();
-    console.log("Creating searchvector from dropdownItem");
-    searchAndRender(name, type);
-  });
-}
-
-function searchTag(name, type) {
-  this.domElement = document.createElement("p");
-  this.domElement.className = "search-tag mx-3";
-  switch (type) {
-    case "ingredients": {
-      this.domElement.classList.add("bg-ingredient");
-      break;
-    }
-  }
-  this.domElement.textContent = name;
-  let hostNode = document.getElementById("tag-container");
-  this.domButton = document.createElement("button");
-  this.domElement.appendChild(this.domButton);
-  this.domButton.className = "search-tag__button";
-  this.domButton.innerHTML = "<i class='far fa-lg fa-times-circle'></i>";
-  this.domButton.type = "button";
-  this.domButton.addEventListener("click", (event) => {
-    hostNode.removeChild(this.domElement);
-  });
-  this.appendToDom = function(){
-    
-    console.log(hostNode);
-    console.log(this.domElement);
-    hostNode.append(this.domElement);
-  }
-  this.parentVector;
-  this.log = function (){
-    console.log("Searchtag created:");
-    console.log(this);
-  }
-}
-
-function searchAndRender(name, type) {
-  let searchVectorFromIngredientItem = new searchVector(name, type);
-  console.log("Search Results are: ");
-  console.log(lookUp(searchVectorFromIngredientItem));
-  createRenderQueue(lookUp(searchVectorFromIngredientItem));
-  console.log("Rendering to DOM");
-
-  renderArray(results.toRender);
-}
-
-function searchVector(string, type) {
-  this.fullString = filterToLowerCase(string);
-  if (type !== undefined) {
-    this.typeReq = filterToLowerCase(type);
-  }
-  this.searchKeys = extractSearchKeys(this.fullString);
-  this.searchKeys.shift();
-  console.log("SearchVector created: ");
-  console.log(this);
-  this.tag = new searchTag (string, type);
-  this.tag.appendToDom();
-  this.tag.parentVector = this;
-  this.tag.log();
-}
-
-const results = {
-  toCompare: [],
-  toRender: [],
-};
 
 function lookUp(searchVector) {
   let lookUpResults = [];
@@ -289,7 +550,11 @@ function lookUp(searchVector) {
       //filteredResults = flatResults;
     }
   }
-
+  if (searchVector.searchKeys.length === 1) {
+    //console.log("searchkey s are length 1, filtered Results are: ")
+    //console.log(filteredResults[0].recipeReferences);
+    return filteredResults[0].recipeReferences[0];
+  }
   //return only references that contain all keys
   if (searchVector.searchKeys.length > 1) {
     //console.log("Entered filtering function");
@@ -311,34 +576,81 @@ function lookUp(searchVector) {
     console.log(swapped);*/
 
     let dictReader = Object.entries(countingDict);
-    console.log(dictReader);
+    //console.log(dictReader);
     //console.log(dictReader.length);
 
     for (b = 0, lenb = dictReader.length; b < lenb; b++) {
       if (dictReader[b][1] === searchVector.searchKeys.length) {
-        console.log("Final searchtarget is: ");
-        console.log(dictReader[b][0]);
+        //console.log("Final searchtarget is: ");
+        //console.log(dictReader[b][0]);
 
         if (searchtree.ingredients[dictReader[b][0]] !== undefined) {
           filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.ingredients[dictReader[b][0]];
+          filteredResults = searchtree.ingredients[dictReader[b][0]].indezes;
         }
         if (searchtree.appliances[dictReader[b][0]] !== undefined) {
           filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.appliances[dictReader[b][0]];
+          filteredResults = searchtree.appliances[dictReader[b][0]].indezes;
         }
         if (searchtree.utensils[dictReader[b][0]] !== undefined) {
           filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.utensils[dictReader[b][0]];
+          filteredResults = searchtree.utensils[dictReader[b][0]].indezes;
         }
         if (searchtree.recipeNames[dictReader[b][0]] !== undefined) {
           filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.recipeNames[dictReader[b][0]];
+          filteredResults = searchtree.recipeNames[dictReader[b][0]].indezes;
         }
       }
     }
   }
+
+  //console.log("loopUp Results are: ");
   //console.log(filteredResults);
+  return filteredResults;
+}
+
+function lookUpTargets(searchVector) {
+  let lookUpResults = [];
+  let filteredResults = [];
+  for (var i = 0, len = searchVector.searchKeys.length; i < len; i++) {
+    //only run search if individual key is longer then 2 characters
+    if (searchVector.searchKeys[i].length > 2) {
+      let shortKey = searchVector.searchKeys[i].substring(0, 3);
+      let stringLength = searchVector.searchKeys[i].length;
+      let stringToCompare = searchVector.searchKeys[i];
+      if (searchVector.typeReq === undefined) {
+        lookUpResults.push(searchtree.searchKeys[shortKey].references);
+      } else {
+        //console.log("Entered type filtering function");
+        for (
+          var x = 0, len2 = searchtree.searchKeys[shortKey].references.length;
+          x < len2;
+          x++
+        ) {
+          //console.log(searchtree.searchKeys[shortKey].references[x].type);
+          //console.log(searchVector.typeReq);
+          if (
+            searchtree.searchKeys[shortKey].references[x].type ==
+            searchVector.typeReq
+          ) {
+            lookUpResults.push(searchtree.searchKeys[shortKey].references[x]);
+          }
+        }
+      }
+      let flatResults = [].concat.apply([], lookUpResults);
+      //lookUpResults = flatResults;
+
+      for (var y = 0, len3 = flatResults.length; y < len3; y++) {
+        let lookUpString = flatResults[y].word.substring(0, stringLength);
+
+        if (lookUpString === stringToCompare) {
+          filteredResults.push(flatResults[y]);
+        }
+      }
+
+      //filteredResults = flatResults;
+    }
+  }
   return filteredResults;
 }
 
@@ -365,11 +677,11 @@ function createRenderQueue(searchResults) {
     }
   }
   let referenceArray = [].concat.apply([], storageArray);
-  console.log(referenceArray);
+  //console.log(referenceArray);
   let uniqueReferences = [...new Set(referenceArray)];
   let concatReferences = [].concat.apply([], uniqueReferences);
-  console.log("unique references are: ");
-  console.log(concatReferences);
+  //console.log("unique references are: ");
+  //console.log(concatReferences);
   results.toRender.splice(0, results.toRender.length);
   results.toRender = concatReferences;
 }
@@ -504,36 +816,16 @@ async function readJsonRecipes() {
 async function main() {
   await readJsonRecipes();
 
-  /* some console logs for testing and debugging -- comment for stable builds */
   growSearchtree(recipes);
-  //console.log("Searchtree Object is : ");
-  //console.log(searchtree);
-  //console.log("recipes object is: ");
-  //console.log(recipes);
-  //let readingArray = [];
-  //let readingArray = Object.entries(searchtree.ingredients);
-  //console.log(Object.entries(searchtree));
-  //console.log(readingArray[0][0]);
-  //let searchtarget = readingArray[0][0];
-  //let searchkeys = searchtarget.split("_");
-  //console.log(searchkeys);
-  /* End of main data display to console */
 
   growSeeds(searchtree);
   console.log(searchtree);
   populateDropdownMenu("ingredient-dropdown-menu", "ingredients");
-  
-  //let testVector = new searchVector("coco");
-  //console.log(testVector);
-  //console.log(lookUp(testVector));
+  populateDropdownMenu("appliance-dropdown-menu", "appliances");
+  populateDropdownMenu("utensil-dropdown-menu", "utensils");
 }
 
 main();
-
-function targetInformation(){
-  this.indezes = [];
-  this.originalName = "";
-}
 
 // builds the main dictionary/searchtree for search requests. calls inner and outer functions
 // takes in the recipes array object to extract searchable strings and push them to a structured dictionary
@@ -546,26 +838,64 @@ function growSearchtree(cookbook) {
       // run through all ingredients of the recipe, read the name as string (a searchable target) and filter that
       for (var e = 0, len = cookbook[x].ingredients.length; e < len; e++) {
         let ingredientKey = "";
+        let originalString = cookbook[x].ingredients[e].ingredient;
 
-        ingredientKey = filterToLowerCase(
-          cookbook[x].ingredients[e].ingredient
-        );
+        ingredientKey = filterToLowerCase(originalString);
         //we are building a dictionary, so the ingredient name is the key, the values are the id's of the recipes the ingredient appears in
         //if the key doesn't exist already create it, else just push the recipe the the values array
         if (dictionary.ingredients[ingredientKey] === undefined) {
-          dictionary.ingredients[ingredientKey] = [];
-          dictionary.ingredients[ingredientKey].push(x);
+          dictionary.ingredients[ingredientKey] = new targetInformation();
+          dictionary.ingredients[ingredientKey].indezes.push(x);
+
+          dictionary.ingredients[ingredientKey].originalName = originalString;
         } else {
-          dictionary.ingredients[ingredientKey].push(x);
+          dictionary.ingredients[ingredientKey].indezes.push(x);
         }
       }
     }
   }
   //same logic, but targeting a different data structure and content in this case Appliances
+  function extractInformation(cookbook, dictionary, x, type) {
+    let itemType = "";
+
+    switch (type) {
+      case "ingredients": {
+        itemType = "ingredient";
+        break;
+      }
+      case "appliances": {
+        itemType = "appliance";
+        break;
+      }
+      case "utensils": {
+        itemType = type;
+        break;
+      }
+    }
+    if (cookbook[x].itemType !== undefined) {
+      for (var e = 0, len = 1; e < len; e++) {
+        let targetKey = "";
+
+        if (cookbook[x].itemType) {
+          targetKey = filterToLowerCase(cookbook[x].itemType);
+        } else {
+          targetKey = filterToLowerCase(cookbook[x].itemType);
+        }
+
+        if (dictionary.type[targetKey] === undefined) {
+          dictionary.type[targetKey] = [];
+          dictionary.type[targetKey].push(x);
+        } else {
+          dictionary.type[targetKey].push(x);
+        }
+      }
+    }
+  }
   function extractAppliances(cookbook, dictionary, x) {
     if (cookbook[x].appliance !== undefined) {
       for (var e = 0, len = 1; e < len; e++) {
         let applianceKey = "";
+        let originalString = cookbook[x].appliance;
 
         if (cookbook[x].appliance) {
           applianceKey = filterToLowerCase(cookbook[x].appliance);
@@ -574,10 +904,11 @@ function growSearchtree(cookbook) {
         }
 
         if (dictionary.appliances[applianceKey] === undefined) {
-          dictionary.appliances[applianceKey] = [];
-          dictionary.appliances[applianceKey].push(x);
+          dictionary.appliances[applianceKey] = new targetInformation();
+          dictionary.appliances[applianceKey].originalName = originalString;
+          dictionary.appliances[applianceKey].indezes.push(x);
         } else {
-          dictionary.appliances[applianceKey].push(x);
+          dictionary.appliances[applianceKey].indezes.push(x);
         }
       }
     }
@@ -587,14 +918,16 @@ function growSearchtree(cookbook) {
     if (cookbook[x].utensils !== undefined) {
       for (var e = 0, len = cookbook[x].utensils.length; e < len; e++) {
         let utensilKey = "";
+        let originalString = cookbook[x].utensils[e];
 
-        utensilKey = filterToLowerCase(cookbook[x].utensils[e]);
+        utensilKey = filterToLowerCase(originalString);
 
         if (dictionary.utensils[utensilKey] === undefined) {
-          dictionary.utensils[utensilKey] = [];
-          dictionary.utensils[utensilKey].push(x);
+          dictionary.utensils[utensilKey] = new targetInformation();
+          dictionary.utensils[utensilKey].originalName = originalString;
+          dictionary.utensils[utensilKey].indezes.push(x);
         } else {
-          dictionary.utensils[utensilKey].push(x);
+          dictionary.utensils[utensilKey].indezes.push(x);
         }
       }
     }
@@ -603,6 +936,7 @@ function growSearchtree(cookbook) {
     if (cookbook[x].name !== undefined) {
       for (var e = 0, len = 1; e < len; e++) {
         let nameKey = "";
+        let originalString = cookbook[x].name;
 
         if (cookbook[x].name) {
           nameKey = filterToLowerCase(cookbook[x].name);
@@ -611,10 +945,11 @@ function growSearchtree(cookbook) {
         }
 
         if (dictionary.recipeNames[nameKey] === undefined) {
-          dictionary.recipeNames[nameKey] = [];
-          dictionary.recipeNames[nameKey].push(x);
+          dictionary.recipeNames[nameKey] = new targetInformation();
+          dictionary.recipeNames[nameKey].originalName = originalString;
+          dictionary.recipeNames[nameKey].indezes.push(x);
         } else {
-          dictionary.recipeNames[nameKey].push(x);
+          dictionary.recipeNames[nameKey].indezes.push(x);
         }
       }
     }
@@ -694,9 +1029,10 @@ async function growSeeds(dictionary) {
     let keyReference = new reference();
     keyReference.searchTarget = originKey;
     keyReference.word = longKey;
+    keyReference.originalString = originDict[originKey].originalName;
     keyReference.type = originDictKey;
     keyReference.recipeReferences = [];
-    keyReference.recipeReferences.push(originDict[originKey]);
+    keyReference.recipeReferences.push(originDict[originKey].indezes);
     key.references.push(keyReference);
 
     return key;

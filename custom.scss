@@ -166,6 +166,9 @@
     size: 3rem;
     margin-right: -1rem;
     bottom: -.05rem;
+    &--inverted{
+      color: black;
+    }
     
   }
   &__button:focus{
@@ -174,8 +177,96 @@
   }
 }
 
+.dropdown-input{
+  
+  width: 20rem;
+  margin-right: 2rem;
+}
+
+.dropdown-text-input{
+  
+  width: 12rem;
+  color: white;
+  border: none;  
+}
+
+.dropdown-text-input:focus, .dropdown-text-input:active, .dropdown-text-input:focus{
+  background-color: inherit;
+}
+
+.dropdown-input > .dropdown-text-input:focus{
+  background-color: inherit;
+  color: white;
+}
+.dropdown-text-input::placeholder{
+  
+    color: white;
+    opacity: 1; 
+}
+
+.dropdown-button{
+  
+  border: none;
+  color: white;
+}
+
+.dropdown-button:focus, .dropdown-button:hover {
+  background-color: inherit;
+  box-shadow: none;
+  border: none;
+  color: white;
+  rotate: 180deg;
+  
+}
+
+.custom-dropdown-menu, .custom-dropdown-menu:focus{
+  background-color: inherit;
+  box-shadow: none;
+  border: none;
+  
+  margin-top: -4px;
+  margin-left: -37.1rem;
+  width: 40rem;
+
+}
+
+.custom-dropdown-item{
+  color: white;
+  max-width: 18rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 0px;
+  margin-left: -2rem;
+}
+.custom-dropdown-item:hover{
+  background-color: inherit;
+  color: rgb(200, 235, 252);
+  border: none;
+  
+}
+.custom-dropdown-item:active{
+  background-color:inherit;
+  border: none;
+}
+
 .bg-ingredient{
   background-color: rgb(50, 96, 213);
+}
+
+.bg-appliance{
+  background-color: #68D9A4;
+  color: white;
+}
+
+ .bg-utensil{
+   background-color: #ED6454;
+   color: white;
+ }
+
+.tag-neutral{
+  background-color: white;
+  border: 2px solid black;
+  color: black;
 }
 
 
