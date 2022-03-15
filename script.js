@@ -39,8 +39,8 @@ async function main() {
   populateDropdownMenu("utensil-dropdown-menu", "utensils");
   console.log(recipes);
   let crawler = new searchCrawler("mas", "ingredients", true);
-  crawler.sumUp();
-  console.log(crawler.loot);
+  //crawler.sumUp();
+  //console.log(crawler.loot);
   console.log(crawler.results());
   renderArray(crawler.results());
   //console.log(lookUpTargets(new searchVector("coc", undefined, false)));
@@ -51,10 +51,7 @@ async function main() {
 
 main();
 
-function searchKey() {
-  shortKey = "";
-  references = [];
-}
+
 
 function reference() {
   searchTarget = "";
@@ -174,6 +171,7 @@ function searchTag(name, type) {
   };
 }
 
+//saves search results
 function loot(originalString) {
   this.originalString = originalString;
   this.referenceByLocation = [];
@@ -182,6 +180,7 @@ function loot(originalString) {
   this.allReferences.fill(false, 0);
 }
 
+//hosts general search functionality, coordinates child objects, gathers results
 function searchCrawler(string, type, publishTag) {
   //filter typos
   switch (type) {
@@ -305,6 +304,7 @@ function searchCrawler(string, type, publishTag) {
 }
 const origin = [];
 
+//helps navigation array to give back correct reference
 function trace(string, target, loot) {
   this.string = string;
   this.target = target;
@@ -312,6 +312,8 @@ function trace(string, target, loot) {
   this.root;
   this.loot = loot;
 }
+
+//recursive function crawling through recipe array
 function findString(traceObject) {
   let trace = traceObject;
   //console.log(trace);
@@ -433,24 +435,7 @@ function compareString(string, target) {
   }
 }
 
-function searchVector(string, type, publishTag) {
-  this.fullString = filterToLowerCase(string);
-  if (type !== undefined) {
-    this.typeReq = filterToLowerCase(type);
-  }
-  this.searchKeys = extractSearchKeys(this.fullString);
-  this.searchKeys.shift();
-  console.log("SearchVector created: ");
-  console.log(this);
-  if (publishTag) {
-    this.tag = new searchTag(string, type);
-    this.tag.appendToDom();
-    this.tag.parentVector = this;
-    //this.tag.log();
-    renderArray(intersectResults());
-  }
-}
-
+// intersects results of all previous (still active) search inputs
 function intersectResults(crawlerArray) {
   if (crawlerArray === undefined) {
     if (renderQueue.length > 1) {
@@ -535,18 +520,7 @@ const results = {
   toRender: [],
 };
 
-function searchAndRender(name, type, publishTag) {
-  if (publishTag === undefined) {
-    publishTag = false;
-  }
-  let searchVectorFromIngredientItem = new searchVector(name, type, publishTag);
-  console.log("Search Results are: ");
-  console.log(intersectResults(searchVectorFromIngredientItem));
-  createRenderQueue(intersectResults(searchVectorFromIngredientItem));
-  console.log("Rendering to DOM");
 
-  renderArray(results.toRender);
-}
 
 //...EVENTLISTENERS...
 {
@@ -949,151 +923,6 @@ function populateDropdownMenu(targetMenu, type, results) {
   }
 }
 
-function lookUp(searchVector) {
-  let lookUpResults = [];
-  let filteredResults = [];
-  for (var i = 0, len = searchVector.searchKeys.length; i < len; i++) {
-    //only run search if individual key is longer then 2 characters
-    if (searchVector.searchKeys[i].length > 2) {
-      let shortKey = searchVector.searchKeys[i].substring(0, 3);
-      let stringLength = searchVector.searchKeys[i].length;
-      let stringToCompare = searchVector.searchKeys[i];
-      if (searchVector.typeReq === undefined) {
-        lookUpResults.push(searchtree.searchKeys[shortKey].references);
-      } else {
-        //console.log("Entered type filtering function");
-        for (
-          var x = 0, len2 = searchtree.searchKeys[shortKey].references.length;
-          x < len2;
-          x++
-        ) {
-          //console.log(searchtree.searchKeys[shortKey].references[x].type);
-          //console.log(searchVector.typeReq);
-          if (
-            searchtree.searchKeys[shortKey].references[x].type ==
-            searchVector.typeReq
-          ) {
-            lookUpResults.push(searchtree.searchKeys[shortKey].references[x]);
-          }
-        }
-      }
-      let flatResults = [].concat.apply([], lookUpResults);
-      //lookUpResults = flatResults;
-
-      for (var y = 0, len3 = flatResults.length; y < len3; y++) {
-        let lookUpString = flatResults[y].word.substring(0, stringLength);
-
-        if (lookUpString === stringToCompare) {
-          filteredResults.push(flatResults[y]);
-        }
-      }
-
-      //filteredResults = flatResults;
-    }
-  }
-  if (searchVector.searchKeys.length === 1) {
-    //console.log("searchkey s are length 1, filtered Results are: ")
-    //console.log(filteredResults[0].recipeReferences);
-    return filteredResults[0].recipeReferences[0];
-  }
-  //return only references that contain all keys
-  if (searchVector.searchKeys.length > 1) {
-    //console.log("Entered filtering function");
-    //console.log("filtered results are: ");
-    //console.log(filteredResults);
-    let countingDict = [];
-    for (a = 0, lena = filteredResults.length; a < lena; a++) {
-      if (countingDict[filteredResults[a].searchTarget] === undefined) {
-        countingDict[filteredResults[a].searchTarget] = 1;
-      } else {
-        countingDict[filteredResults[a].searchTarget]++;
-        //console.log(countingDict[filteredResults[a].searchTarget]);
-      }
-    }
-    /*console.log(countingDict);
-    let swapped = Object.fromEntries(
-      Object.entries(countingDict).map((a) => a.reverse())
-    );
-    console.log(swapped);*/
-
-    let dictReader = Object.entries(countingDict);
-    //console.log(dictReader);
-    //console.log(dictReader.length);
-
-    for (b = 0, lenb = dictReader.length; b < lenb; b++) {
-      if (dictReader[b][1] === searchVector.searchKeys.length) {
-        //console.log("Final searchtarget is: ");
-        //console.log(dictReader[b][0]);
-
-        if (searchtree.ingredients[dictReader[b][0]] !== undefined) {
-          filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.ingredients[dictReader[b][0]].indezes;
-        }
-        if (searchtree.appliances[dictReader[b][0]] !== undefined) {
-          filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.appliances[dictReader[b][0]].indezes;
-        }
-        if (searchtree.utensils[dictReader[b][0]] !== undefined) {
-          filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.utensils[dictReader[b][0]].indezes;
-        }
-        if (searchtree.recipeNames[dictReader[b][0]] !== undefined) {
-          filteredResults.splice(0, filteredResults.length);
-          filteredResults = searchtree.recipeNames[dictReader[b][0]].indezes;
-        }
-      }
-    }
-  }
-
-  //console.log("loopUp Results are: ");
-  //console.log(filteredResults);
-  return filteredResults;
-}
-
-function lookUpTargets(searchVector) {
-  let lookUpResults = [];
-  let filteredResults = [];
-  for (var i = 0, len = searchVector.searchKeys.length; i < len; i++) {
-    //only run search if individual key is longer then 2 characters
-    if (searchVector.searchKeys[i].length > 2) {
-      let shortKey = searchVector.searchKeys[i].substring(0, 3);
-      let stringLength = searchVector.searchKeys[i].length;
-      let stringToCompare = searchVector.searchKeys[i];
-      if (searchVector.typeReq === undefined) {
-        lookUpResults.push(searchtree.searchKeys[shortKey].references);
-      } else {
-        //console.log("Entered type filtering function");
-        for (
-          var x = 0, len2 = searchtree.searchKeys[shortKey].references.length;
-          x < len2;
-          x++
-        ) {
-          //console.log(searchtree.searchKeys[shortKey].references[x].type);
-          //console.log(searchVector.typeReq);
-          if (
-            searchtree.searchKeys[shortKey].references[x].type ==
-            searchVector.typeReq
-          ) {
-            lookUpResults.push(searchtree.searchKeys[shortKey].references[x]);
-          }
-        }
-      }
-      let flatResults = [].concat.apply([], lookUpResults);
-      //lookUpResults = flatResults;
-
-      for (var y = 0, len3 = flatResults.length; y < len3; y++) {
-        let lookUpString = flatResults[y].word.substring(0, stringLength);
-
-        if (lookUpString === stringToCompare) {
-          filteredResults.push(flatResults[y]);
-        }
-      }
-
-      //filteredResults = flatResults;
-    }
-  }
-  return filteredResults;
-}
 
 function createRenderQueue(searchResults) {
   let storageArray = [];
@@ -1257,251 +1086,6 @@ async function readJsonRecipes() {
     });
 }
 
-//...Grow Index Algorithm Searchtree...
-
-// builds the main dictionary/searchtree for search requests. calls inner and outer functions
-// takes in the recipes array object to extract searchable strings and push them to a structured dictionary
-function growSearchtree(cookbook) {
-  // extracts ingredient strings and pushes them as well as their origin recipe id to searchtree/ingredients
-  // cookbook is the recipes object, dictionary is the searchtree (target), x is the index/id of the the recipe worked on
-  function extractIngredients(cookbook, dictionary, x) {
-    //check for undefined / if there are ingredients
-    if (cookbook[x].ingredients !== undefined) {
-      // run through all ingredients of the recipe, read the name as string (a searchable target) and filter that
-      for (var e = 0, len = cookbook[x].ingredients.length; e < len; e++) {
-        let ingredientKey = "";
-        let originalString = cookbook[x].ingredients[e].ingredient;
-
-        ingredientKey = filterToLowerCase(originalString);
-        //we are building a dictionary, so the ingredient name is the key, the values are the id's of the recipes the ingredient appears in
-        //if the key doesn't exist already create it, else just push the recipe the the values array
-        if (dictionary.ingredients[ingredientKey] === undefined) {
-          dictionary.ingredients[ingredientKey] = new targetInformation();
-          dictionary.ingredients[ingredientKey].indezes.push(x);
-
-          dictionary.ingredients[ingredientKey].originalName = originalString;
-        } else {
-          dictionary.ingredients[ingredientKey].indezes.push(x);
-        }
-      }
-    }
-  }
-  //same logic, but targeting a different data structure and content in this case Appliances
-  function extractInformation(cookbook, dictionary, x, type) {
-    let itemType = "";
-
-    switch (type) {
-      case "ingredients": {
-        itemType = "ingredient";
-        break;
-      }
-      case "appliances": {
-        itemType = "appliance";
-        break;
-      }
-      case "utensils": {
-        itemType = type;
-        break;
-      }
-    }
-    if (cookbook[x].itemType !== undefined) {
-      for (var e = 0, len = 1; e < len; e++) {
-        let targetKey = "";
-
-        if (cookbook[x].itemType) {
-          targetKey = filterToLowerCase(cookbook[x].itemType);
-        } else {
-          targetKey = filterToLowerCase(cookbook[x].itemType);
-        }
-
-        if (dictionary.type[targetKey] === undefined) {
-          dictionary.type[targetKey] = [];
-          dictionary.type[targetKey].push(x);
-        } else {
-          dictionary.type[targetKey].push(x);
-        }
-      }
-    }
-  }
-  function extractAppliances(cookbook, dictionary, x) {
-    if (cookbook[x].appliance !== undefined) {
-      for (var e = 0, len = 1; e < len; e++) {
-        let applianceKey = "";
-        let originalString = cookbook[x].appliance;
-
-        if (cookbook[x].appliance) {
-          applianceKey = filterToLowerCase(cookbook[x].appliance);
-        } else {
-          applianceKey = filterToLowerCase(cookbook[x].appliance);
-        }
-
-        if (dictionary.appliances[applianceKey] === undefined) {
-          dictionary.appliances[applianceKey] = new targetInformation();
-          dictionary.appliances[applianceKey].originalName = originalString;
-          dictionary.appliances[applianceKey].indezes.push(x);
-        } else {
-          dictionary.appliances[applianceKey].indezes.push(x);
-        }
-      }
-    }
-  }
-  //same logic, but targeting a different data structure and content in this case Utensils
-  function extractUtensils(cookbook, dictionary, x) {
-    if (cookbook[x].utensils !== undefined) {
-      for (var e = 0, len = cookbook[x].utensils.length; e < len; e++) {
-        let utensilKey = "";
-        let originalString = cookbook[x].utensils[e];
-
-        utensilKey = filterToLowerCase(originalString);
-
-        if (dictionary.utensils[utensilKey] === undefined) {
-          dictionary.utensils[utensilKey] = new targetInformation();
-          dictionary.utensils[utensilKey].originalName = originalString;
-          dictionary.utensils[utensilKey].indezes.push(x);
-        } else {
-          dictionary.utensils[utensilKey].indezes.push(x);
-        }
-      }
-    }
-  }
-  function extractNames(cookbook, dictionary, x) {
-    if (cookbook[x].name !== undefined) {
-      for (var e = 0, len = 1; e < len; e++) {
-        let nameKey = "";
-        let originalString = cookbook[x].name;
-
-        if (cookbook[x].name) {
-          nameKey = filterToLowerCase(cookbook[x].name);
-        } else {
-          nameKey = filterToLowerCase(cookbook[x].name);
-        }
-
-        if (dictionary.recipeNames[nameKey] === undefined) {
-          dictionary.recipeNames[nameKey] = new targetInformation();
-          dictionary.recipeNames[nameKey].originalName = originalString;
-          dictionary.recipeNames[nameKey].indezes.push(x);
-        } else {
-          dictionary.recipeNames[nameKey].indezes.push(x);
-        }
-      }
-    }
-  }
-  //run all three variations to build the searchtree dictionary from the cookbook (recipes) object
-  for (var i = 1, len = cookbook.length; i < len; i++) {
-    extractIngredients(cookbook, searchtree, i);
-    extractAppliances(cookbook, searchtree, i);
-    extractUtensils(cookbook, searchtree, i);
-    extractNames(cookbook, searchtree, i);
-  }
-}
-
-//takes strings(full searchtargets, e.g. "coconut milk") as an input and returns individual words
-function extractSearchKeys(searchtarget) {
-  //split at spaces
-  let carrier = searchtarget.split(" ");
-  let searchKeys = [];
-
-  //push initial unsplitted word to index 0 of array for later reference
-  searchKeys.push(searchtarget);
-
-  //if the splitting isn't complete run it again
-  for (var i = 0, len = carrier.length; i < len; i++) {
-    searchKeys.push(carrier[i].split("_"));
-  }
-
-  //flatten in case a nested array is created that way
-  let flatSearchKeys = [].concat.apply([], searchKeys);
-  return flatSearchKeys;
-}
-// adds a layer of short string keys(searchKeys) to the searchtree object through which the data can be accessed
-// extract all individual searchable strings from the searchtree dictionary, further break them into the combination of three characters (shortkeys)(search starts after user entered 3 letters)
-// fill searchkeys sub dictionary with these shortkeys, store reference (key/index) to original key or recipe
-async function growSeeds(dictionary) {
-  function insertShortKey(dictionary, key) {
-    if (dictionary.searchKeys[key.shortKey] === undefined) {
-      dictionary.searchKeys[key.shortKey] = key;
-    } else {
-      dictionary.searchKeys[key.shortKey].references.push(key.references[0]);
-    }
-  }
-
-  function insertShortKeyArray(dictionary, keyArray) {
-    for (var i = 0, len = keyArray.length; i < len; i++) {
-      insertShortKey(dictionary, keyArray[i]);
-    }
-  }
-
-  function createShortKeyArray(longKeyArray, originDict, originDictKey) {
-    let shortKeyArray = [];
-    //console.log("Longkey Index 0 is " + longKeyArray[0]);
-    //start at 1 to jump over unsplit key
-    for (var i = 1, len = longKeyArray.length; i < len; i++) {
-      shortKeyArray.push(
-        createShortKey(
-          longKeyArray[i],
-          originDict,
-          longKeyArray[0],
-          originDictKey
-        )
-      );
-    }
-    //console.log("ShortKeyArray is: ");
-    //console.log(shortKeyArray);
-    //console.log("longkeyArray is:");
-    //console.log(longKeyArray);
-    return shortKeyArray;
-  }
-
-  //takes in a single word, origindictionary and originkey and creates a searchKey + reference Object out of it
-  function createShortKey(longKey, originDict, originKey, originDictKey) {
-    let shortKey = longKey.substring(0, 3);
-    let key = new searchKey();
-    key.shortKey = shortKey;
-    key.references = [];
-    let keyReference = new reference();
-    keyReference.searchTarget = originKey;
-    keyReference.word = longKey;
-    keyReference.originalString = originDict[originKey].originalName;
-    keyReference.type = originDictKey;
-    keyReference.recipeReferences = [];
-    keyReference.recipeReferences.push(originDict[originKey].indezes);
-    key.references.push(keyReference);
-
-    return key;
-  }
-
-  //takes a subdictionary (e.g. ingredients) of the searchtree and divides the keys further down into words and the first 3 letters (shortkeys) of each
-  //pushes all shortkeys to the searchKeys subdictionary of searchtree, single entry for each key, if multiple appearences store into searchKeys.orgin
-  function processSearchtargets(subDictionaryKey) {
-    let subDictionary = dictionary[subDictionaryKey];
-
-    //read the key names of the subdictionary into an array
-    let subReader = Object.entries(dictionary[subDictionaryKey]);
-
-    // run trough all entries and extract the individual words as well as there 3 char primitives to store them in the searchKeys dict
-    for (var i = 0, len = subReader.length; i < len; i++) {
-      let currentSearchtarget = subReader[i][0];
-      //first isolate the individual words (if there is more then one)
-      let extractedSearchKeys = extractSearchKeys(currentSearchtarget);
-
-      //then isolate the shortKeys
-      let keysToStore = createShortKeyArray(
-        extractedSearchKeys,
-        subDictionary,
-        subDictionaryKey
-      );
-      //and finally integrate them into the searchtree.searchKeys subdict
-      insertShortKeyArray(searchtree, keysToStore);
-    }
-  }
-
-  processSearchtargets("ingredients");
-  processSearchtargets("appliances");
-  processSearchtargets("utensils");
-  processSearchtargets("recipeNames");
-  //console.log("Final searchtree is: ");
-  //console.log(searchtree);
-}
 
 // replaces all certain special characters and space to make data uniform
 
