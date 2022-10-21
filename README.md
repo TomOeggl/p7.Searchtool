@@ -28,3 +28,6 @@ Recursive function running through the database on every search input.
 Performance comparison: 
 Algorithm 1 is two orders of magnitude faster then Algorithm 2 if you take user searchinput as starting point for measurement. 
 Would scale well if dictionary creation is run on server. Overkill for this projectsize though, as no noticeable difference occurs to the user on this project.
+
+Functionality Investigations Sheet: 
+https://github.com/TomOeggl/p7.Searchtool/blob/0f8c81a3923bead0977e0de5638625fdbd59a2fa/files/THOMAS%20OEGGL_7_03222021.pdf
