@@ -788,7 +788,7 @@ function renderArray(indexArray) {
 }
 
 async function readJsonRecipes() {
-  const parsedData = await fetch("/files/recipes.json")
+  const parsedData = await fetch("./files/recipes.json")
     .then((response) => {
       if (!response.ok) {
         throw new Error("HTTP error " + response.status);
